@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>hackermain</title>
     <script>
+        // ฟังก์ชันที่จะทำให้ไปที่ URL ใหม่ในหน้าเดียวกัน
         function goToPage(url) {
             window.location.href = url;
         }
@@ -40,23 +41,32 @@
     </form>
 
     <script>
+        // ตัวแปรนับจำนวนครั้งที่กรอกข้อมูลผิด
         let attempts = 0;
 
+        // ฟังก์ชันตรวจสอบข้อมูล
         document.getElementById("userForm").addEventListener("submit", function(event) {
-            event.preventDefault();
+            event.preventDefault(); // ป้องกันการรีเฟรชหน้า
             const name = document.getElementById("name").value;
-             
+            
+            // ตรวจสอบข้อมูล
             if (name === "n.01-go") {
+                // ถ้าข้อมูลถูกต้อง ไปยังเว็บไซต์ที่ต้องการ
                 window.location.href = "https://one.one.one.one/";
+                attempts = 0
             } else if (name === "n.02-go") {
                 window.location.href = "https://one.one.one.one/";
+                attempts = 0
             } else {
-                attempts++;
+                // ถ้าข้อมูลไม่ถูกต้อง
+                attempts++; // เพิ่มจำนวนครั้งที่กรอกผิด
 
                 if (attempts >= 6) {
-                    alert("คุณถูกเตะออกจากเว็บไซต์");
-                    window.location.href = "about:blank";
+                    // ถ้ากรอกผิด 3 ครั้ง จะเตะผู้ใช้ออกจากหน้าเว็บ
+                    alert("คุณถูกเตะออกจากเว็บไซต์"); // แสดงข้อความแจ้ง
+                    window.location.href = "about:blank"; // นำผู้ใช้ไปยังหน้าเปล่า (ถ้าไม่สามารถปิดหน้าได้)
                 } else {
+                    // ถ้ากรอกผิดน้อยกว่า 3 ครั้ง แสดงข้อความ
                     alert("ข้อมูลไม่ถูกต้อง กรุณาลองใหม่" + attempts + "/6");
                 }
             }
