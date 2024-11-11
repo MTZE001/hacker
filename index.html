@@ -21,7 +21,6 @@
     <p>What do you want from me?</p>
     <h1>
         <span style="font-size: 0.5em; font-weight: normal; display: inline;">[สแปมข้อความผ่านเบอร์]</span>
-        <!-- เปลี่ยนการคลิกด้วย JavaScript เพื่อไปที่ URL -->
         <a href="javascript:void(0)" onclick="goToPage('https://www.youtube.com/watch?v=BHf14Ln8-ig')" style="text-decoration: none; color: black; font-size: 0.5em; margin-left: 10px;">(Click)</a><br><br>
         
         <span style="font-size: 0.5em; font-weight: normal; display: inline;">[ลงไวรัสในแฟลชไดร์ฟ]</span>
@@ -32,9 +31,45 @@
         
         <span style="font-size: 0.5em; font-weight: normal; display: inline;">[แฮกอินเตอร์เน็ตไร้สาย]</span>
         <a href="javascript:void(0)" onclick="goToPage('https://www.youtube.com/watch?v=dQw4w9WgXcQ')" style="text-decoration: none; color: black; font-size: 0.5em; margin-left: 20px;">(Click)</a><br><br>
-        
-        <span style="font-size: 0.5em; font-weight: normal; display: inline;">รอการอัปเดท.........</span>
+
+        <span style="font-size: 0.5em; font-weight: normal; display: inline;">รอการอัปเดท.........</span><br><br>
     </h1>
+    <form id="userForm">
+        <label for="name" style="font-size: 0.4cm;font-weight: normal;">รหัส:</label>
+        <input type="text" id="name" required>
+        <button type="submit">ยืนยัน</button>
+    </form>
+
+    <script>
+        // ตัวแปรนับจำนวนครั้งที่กรอกข้อมูลผิด
+        let attempts = 0;
+
+        // ฟังก์ชันตรวจสอบข้อมูล
+        document.getElementById("userForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // ป้องกันการรีเฟรชหน้า
+            const name = document.getElementById("name").value;
+            
+            // ตรวจสอบข้อมูล
+            if (name === "n.01-go") {
+                // ถ้าข้อมูลถูกต้อง ไปยังเว็บไซต์ที่ต้องการ
+                window.location.href = "https://one.one.one.one/";
+            } else if (name === "n.02-go") {
+                window.location.href = "https://one.one.one.one/";
+            } else {
+                // ถ้าข้อมูลไม่ถูกต้อง
+                attempts++; // เพิ่มจำนวนครั้งที่กรอกผิด
+
+                if (attempts >= 6) {
+                    // ถ้ากรอกผิด 3 ครั้ง จะเตะผู้ใช้ออกจากหน้าเว็บ
+                    alert("คุณถูกเตะออกจากเว็บไซต์"); // แสดงข้อความแจ้ง
+                    window.location.href = "about:blank"; // นำผู้ใช้ไปยังหน้าเปล่า (ถ้าไม่สามารถปิดหน้าได้)
+                } else {
+                    // ถ้ากรอกผิดน้อยกว่า 3 ครั้ง แสดงข้อความ
+                    alert("ข้อมูลไม่ถูกต้อง กรุณาลองใหม่" + attempts + "/6");
+                }
+            }
+        });
+    </script>
 
     <br><li style="font-size: 0.35cm;">เว็ปไซต์ส่วนบุคคล ไม่สามารถใช้งานได้หากไม่มีการใส่รหัส.</li>
 </body>
