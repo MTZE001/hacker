@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คู่มือ SQLMap บน Kali Linux ฉบับสมบูรณ์</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2333;
+    --border: #30363d;
+    --accent: #39d353;
+    --accent2: #58a6ff;
+    --accent3: #f78166;
+    --warn: #e3b341;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --code-bg: #0d1117;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #1a2744 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 32px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 39px,
+      rgba(57,211,83,0.04) 39px,
+      rgba(57,211,83,0.04) 40px
+    ), repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 39px,
+      rgba(57,211,83,0.04) 39px,
+      rgba(57,211,83,0.04) 40px
+    );
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(57,211,83,0.12);
+    border: 1px solid rgba(57,211,83,0.3);
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    position: relative;
+  }
+  .hero h1 {
+    font-size: clamp(24px, 4vw, 42px);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    position: relative;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub {
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    margin-top: 12px;
+    position: relative;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    margin-top: 28px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+  .hero-meta span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .hero-meta span::before { content: '▸'; color: var(--accent); }
+
+  /* WARNING */
+  .warning-banner {
+    background: rgba(231,163,65,0.1);
+    border: 1px solid rgba(231,163,65,0.4);
+    border-left: 4px solid var(--warn);
+    padding: 18px 24px;
+    margin: 28px auto;
+    max-width: 900px;
+    border-radius: 4px;
+  }
+  .warning-banner .warn-title {
+    color: var(--warn);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .warning-banner p { color: #c9a227; font-size: 14px; }
+
+  /* LAYOUT */
+  .wrapper {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* NAV */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 24px 28px;
+    margin: 32px 0;
+  }
+  .toc-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 6px 24px;
+  }
+  .toc a {
+    color: var(--accent2);
+    text-decoration: none;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 0;
+    transition: color 0.15s;
+  }
+  .toc a::before {
+    content: attr(data-num);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    min-width: 20px;
+  }
+  .toc a:hover { color: var(--accent); }
+
+  /* SECTIONS */
+  .section {
+    margin-top: 48px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(57,211,83,0.1);
+    border: 1px solid rgba(57,211,83,0.25);
+    padding: 3px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* SUBSECTIONS */
+  .subsection {
+    margin-top: 28px;
+  }
+  .subsection-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent2);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .subsection-title::before {
+    content: '▸';
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  /* CODE BLOCKS */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 12px 0;
+  }
+  .code-header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .code-lang {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .code-dots span:nth-child(1) { background: #ff5f56; }
+  .code-dots span:nth-child(2) { background: #ffbd2e; }
+  .code-dots span:nth-child(3) { background: #27c93f; }
+  pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: #cdd9e5;
+  }
+  .cmd { color: #79c0ff; }
+  .flag { color: #ffa657; }
+  .str { color: #a5d6ff; }
+  .comment { color: #6e7681; font-style: italic; }
+  .out-info { color: var(--accent); }
+  .out-warn { color: var(--warn); }
+  .out-crit { color: var(--accent3); }
+  .out-neutral { color: #8b949e; }
+
+  /* OUTPUT BLOCKS */
+  .output-block {
+    background: #090c10;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 16px 18px;
+    margin: 10px 0 18px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #8b949e;
+    overflow-x: auto;
+  }
+  .output-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* DESCRIPTION */
+  .desc-list {
+    list-style: none;
+    margin-top: 10px;
+  }
+  .desc-list li {
+    padding: 5px 0 5px 20px;
+    position: relative;
+    font-size: 14px;
+    color: #c9d1d9;
+  }
+  .desc-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 12px;
+  }
+
+  /* TABLE */
+  .styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-family: 'IBM Plex Mono', monospace;
+    margin: 12px 0;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .styled-table thead {
+    background: var(--surface2);
+  }
+  .styled-table th {
+    padding: 10px 16px;
+    text-align: left;
+    color: var(--accent2);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .styled-table td {
+    padding: 9px 16px;
+    color: #c9d1d9;
+    border-bottom: 1px solid rgba(48,54,61,0.5);
+    vertical-align: top;
+  }
+  .styled-table tbody tr:last-child td { border-bottom: none; }
+  .styled-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+  .styled-table td:first-child {
+    color: #ffa657;
+    white-space: nowrap;
+  }
+
+  /* PARAM TABLE */
+  .param-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 12px 0;
+  }
+  .param-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    border-bottom: 1px solid rgba(48,54,61,0.5);
+  }
+  .param-row:last-child { border-bottom: none; }
+  .param-key {
+    background: var(--surface2);
+    padding: 10px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: #ffa657;
+    border-right: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+  }
+  .param-val {
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #c9d1d9;
+    display: flex;
+    align-items: center;
+  }
+
+  /* WORKFLOW */
+  .workflow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 16px 0;
+  }
+  .workflow-step {
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+  }
+  .workflow-spine {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 32px;
+    flex-shrink: 0;
+  }
+  .workflow-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  .workflow-line {
+    width: 2px;
+    background: rgba(57,211,83,0.2);
+    flex: 1;
+    margin: 2px 0;
+  }
+  .workflow-step:last-child .workflow-line { display: none; }
+  .workflow-content {
+    flex: 1;
+    padding-bottom: 20px;
+  }
+  .workflow-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  /* PROTECTION CARDS */
+  .protect-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+  }
+  .protect-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 18px;
+  }
+  .protect-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .protect-card-title .num {
+    background: rgba(88,166,255,0.12);
+    color: var(--accent2);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .protect-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* QUICK REF */
+  .qref-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .qref-table thead { background: var(--surface2); }
+  .qref-table th {
+    padding: 10px 14px;
+    text-align: left;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .qref-table td {
+    padding: 7px 14px;
+    border-bottom: 1px solid rgba(48,54,61,0.4);
+    vertical-align: middle;
+  }
+  .qref-table tbody tr:last-child td { border-bottom: none; }
+  .qref-table tbody tr:hover { background: rgba(57,211,83,0.03); }
+  .qref-table td:first-child { color: #c9d1d9; width: 30%; }
+  .qref-table td:last-child {
+    font-family: 'IBM Plex Mono', monospace;
+    color: #a5d6ff;
+    font-size: 11.5px;
+  }
+  .qref-cat {
+    background: var(--surface2);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding: 5px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .qref-cat td { padding: 5px 14px !important; }
+
+  /* FOOTER */
+  footer {
+    margin-top: 64px;
+    padding: 32px 24px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+  footer p { font-size: 12px; color: var(--muted); line-height: 1.8; }
+  footer strong { color: var(--warn); }
+
+  /* UTILITY */
+  .tag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+  .tag-b { background: rgba(57,211,83,0.12); color: var(--accent); }
+  .tag-e { background: rgba(247,129,102,0.12); color: var(--accent3); }
+  .tag-t { background: rgba(227,179,65,0.12); color: var(--warn); }
+  .tag-u { background: rgba(88,166,255,0.12); color: var(--accent2); }
+
+  p { font-size: 14px; color: #c9d1d9; margin: 8px 0; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  @media(max-width:600px) {
+    .param-row { grid-template-columns: 1fr; }
+    .param-key { border-right: none; border-bottom: 1px solid var(--border); }
+    .toc-grid { grid-template-columns: 1fr 1fr; }
+    .protect-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">Open Source Security Tool</div>
+  <h1>คู่มือ <span>SQLMap</span> บน Kali Linux<br>ฉบับสมบูรณ์</h1>
+  <p class="hero-sub">SQLMap Complete Guide · Version 1.x · Kali Linux 2024+</p>
+  <div class="hero-meta">
+    <span>Penetration Testing</span>
+    <span>SQL Injection</span>
+    <span>ภาษาไทย</span>
+    <span>21 หัวข้อ</span>
+  </div>
+</div>
+
+<div class="wrapper">
+
+  <!-- WARNING -->
+  <div class="warning-banner">
+    <div class="warn-title">⚠ คำเตือนสำคัญ / IMPORTANT WARNING</div>
+    <p>เครื่องมือนี้ใช้เพื่อการทดสอบความปลอดภัย (Penetration Testing) <strong>เท่านั้น</strong><br>
+    การใช้งานกับระบบที่ไม่ได้รับอนุญาตถือเป็นความผิดทางกฎหมาย<br>
+    ใช้เฉพาะกับระบบที่คุณได้รับอนุญาตอย่างเป็นลายลักษณ์อักษรเท่านั้น</p>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-title">สารบัญ</div>
+    <div class="toc-grid">
+      <a href="#s1" data-num="01">SQLMap คืออะไร?</a>
+      <a href="#s2" data-num="02">ติดตั้ง SQLMap</a>
+      <a href="#s3" data-num="03">โครงสร้างคำสั่งพื้นฐาน</a>
+      <a href="#s4" data-num="04">ตรวจจับช่องโหว่</a>
+      <a href="#s5" data-num="05">Database Enumeration</a>
+      <a href="#s6" data-num="06">ทดสอบ POST Request</a>
+      <a href="#s7" data-num="07">Cookie และ Session</a>
+      <a href="#s8" data-num="08">Bypass WAF / Evasion</a>
+      <a href="#s9" data-num="09">ประเภทการโจมตี</a>
+      <a href="#s10" data-num="10">Database ต่างๆ</a>
+      <a href="#s11" data-num="11">OS Command &amp; File Access</a>
+      <a href="#s12" data-num="12">คำสั่งเพิ่มเติม</a>
+      <a href="#s13" data-num="13">Proxy และ Tor</a>
+      <a href="#s14" data-num="14">ตัวเลือกประหยัดเวลา</a>
+      <a href="#s15" data-num="15">HTTPS &amp; Custom Headers</a>
+      <a href="#s16" data-num="16">Custom SQL Query</a>
+      <a href="#s17" data-num="17">Verbosity Levels</a>
+      <a href="#s18" data-num="18">ผลลัพธ์และไฟล์</a>
+      <a href="#s19" data-num="19">Full Attack Chain</a>
+      <a href="#s20" data-num="20">ป้องกัน SQL Injection</a>
+      <a href="#s21" data-num="21">Quick Reference</a>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title">SQLMap คืออะไร?</h2>
+    </div>
+    <p>SQLMap เป็นเครื่องมือ Open Source สำหรับทดสอบช่องโหว่ SQL Injection อัตโนมัติ มีความสามารถครอบคลุมตั้งแต่การตรวจจับจนถึงการ exploit</p>
+    <ul class="desc-list" style="margin-top:14px;">
+      <li>ตรวจจับและ Exploit ช่องโหว่ SQL Injection</li>
+      <li>รองรับฐานข้อมูลหลายประเภท: MySQL, PostgreSQL, MSSQL, Oracle, SQLite และอื่นๆ</li>
+      <li>ดึงข้อมูลจากฐานข้อมูล: ชื่อ DB, ตาราง, คอลัมน์, ข้อมูล</li>
+      <li>Bypass WAF, Firewall, IDS/IPS ด้วย Tamper Scripts</li>
+      <li>เข้าถึง OS Shell, อ่าน/เขียนไฟล์บนเซิร์ฟเวอร์</li>
+    </ul>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">ติดตั้ง SQLMap บน Kali Linux</h2>
+    </div>
+    <p>SQLMap มาพร้อมกับ Kali Linux อยู่แล้ว แต่ถ้าต้องการติดตั้งหรืออัปเดต:</p>
+
+    <div class="code-block" style="margin-top:14px;">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-lang">bash</span>
+      </div>
+      <pre><span class="comment"># ตรวจสอบว่ามีอยู่แล้วหรือไม่</span>
+<span class="cmd">$</span> sqlmap --version
+
+<span class="comment"># ติดตั้งผ่าน apt</span>
+<span class="cmd">$</span> sudo apt update && sudo apt install sqlmap -y
+
+<span class="comment"># หรืออัปเดตจาก GitHub (เวอร์ชันล่าสุด)</span>
+<span class="cmd">$</span> git clone https://github.com/sqlmapproject/sqlmap.git
+<span class="cmd">$</span> cd sqlmap
+<span class="cmd">$</span> python3 sqlmap.py --version</pre>
+    </div>
+
+    <div class="output-block">
+      <div class="output-label">output</div>
+        ___
+       __H__
+ ___ ___[)]_____ ___ ___  {1.8.3#stable}
+|_ -| . [,]     | .'| . |
+|___|_  ["]_|_|_|__,|  _|
+      |_|V...       |_|   https://sqlmap.org
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">โครงสร้างคำสั่งพื้นฐาน</h2>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-lang">syntax</span>
+      </div>
+      <pre>sqlmap [OPTIONS] -u <span class="str">"URL"</span> [PARAMETERS]</pre>
+    </div>
+
+    <div class="param-card" style="margin-top:16px;">
+      <div class="param-row"><div class="param-key">-u / --url</div><div class="param-val">กำหนด URL เป้าหมาย</div></div>
+      <div class="param-row"><div class="param-key">-p</div><div class="param-val">กำหนด parameter ที่ต้องการทดสอบ</div></div>
+      <div class="param-row"><div class="param-key">--data</div><div class="param-val">ส่งข้อมูลแบบ POST</div></div>
+      <div class="param-row"><div class="param-key">--cookie</div><div class="param-val">ส่ง Cookie</div></div>
+      <div class="param-row"><div class="param-key">--level</div><div class="param-val">ระดับความเข้มข้น (1-5, ค่าเริ่มต้น=1)</div></div>
+      <div class="param-row"><div class="param-key">--risk</div><div class="param-val">ระดับความเสี่ยง (1-3, ค่าเริ่มต้น=1)</div></div>
+      <div class="param-row"><div class="param-key">--batch</div><div class="param-val">ตอบ Yes อัตโนมัติทุกคำถาม</div></div>
+      <div class="param-row"><div class="param-key">--dbs</div><div class="param-val">แสดงรายชื่อฐานข้อมูลทั้งหมด</div></div>
+      <div class="param-row"><div class="param-key">--tables</div><div class="param-val">แสดงตารางในฐานข้อมูล</div></div>
+      <div class="param-row"><div class="param-key">--columns</div><div class="param-val">แสดงคอลัมน์ในตาราง</div></div>
+      <div class="param-row"><div class="param-key">--dump</div><div class="param-val">ดึงข้อมูลทั้งหมดในตาราง</div></div>
+      <div class="param-row"><div class="param-key">-D / -T / -C</div><div class="param-val">กำหนดชื่อ Database / Table / Column</div></div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title">การทดสอบเบื้องต้น – ตรวจจับช่องโหว่</h2>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">4.1 ทดสอบ URL Parameter อย่างง่าย</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span></div>
+        <pre><span class="cmd">$</span> sqlmap -u <span class="str">"http://testsite.com/item.php?id=1"</span></pre>
+      </div>
+      <div class="output-block">
+        <div class="output-label">injection points detected</div>
+<span class="out-info">[INFO]</span> GET parameter 'id' appears to be dynamic
+<span class="out-info">[INFO]</span> heuristic test sh
