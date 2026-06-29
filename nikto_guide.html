@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คู่มือ NIKTO — Web Server Vulnerability Scanner</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+Thai:wght@300;400;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #141720;
+    --surface2: #1c2130;
+    --border: #252c3e;
+    --accent: #00e5c3;
+    --accent-dim: rgba(0,229,195,0.12);
+    --accent2: #ff6b6b;
+    --accent3: #ffd166;
+    --text: #c9d1e0;
+    --text-muted: #5c677d;
+    --text-bright: #eef1f7;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Space Grotesk', 'Noto Sans Thai', sans-serif;
+    --thai: 'Noto Sans Thai', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--thai);
+    font-size: 16px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ─── HERO ─────────────────────────────────── */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 80px 24px 64px;
+    text-align: center;
+    background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,229,195,0.14) 0%, transparent 70%);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,195,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,195,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .hero-label {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid rgba(0,229,195,0.3);
+    border-radius: 4px;
+    padding: 4px 12px;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-family: var(--mono);
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    text-shadow: 0 0 40px rgba(0,229,195,0.35);
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+
+  .hero-sub {
+    font-family: var(--thai);
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    max-width: 520px;
+    margin: 0 auto 32px;
+  }
+
+  .hero-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+  .hero-stat span { color: var(--accent); font-weight: 600; }
+
+  /* ─── WARNING BANNER ────────────────────────── */
+  .warning {
+    background: rgba(255,107,107,0.07);
+    border-left: 4px solid var(--accent2);
+    border-radius: 0 8px 8px 0;
+    padding: 20px 24px;
+    margin: 32px auto;
+    max-width: 860px;
+  }
+  .warning-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+  .warning-title::before { content: '⚠'; font-size: 1.1rem; }
+  .warning p { font-size: 0.93rem; color: #b0bac8; line-height: 1.65; }
+  .warning p + p { margin-top: 6px; }
+
+  /* ─── LAYOUT ────────────────────────────────── */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ─── SECTION HEADER ────────────────────────── */
+  .section {
+    margin-top: 64px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid rgba(0,229,195,0.25);
+    border-radius: 4px;
+    padding: 3px 9px;
+    white-space: nowrap;
+  }
+
+  .section-header h2 {
+    font-family: var(--sans);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: -0.01em;
+  }
+
+  /* ─── CARDS ─────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .card p { color: var(--text); font-size: 0.95rem; }
+  .card p + p { margin-top: 8px; }
+
+  /* ─── FEATURE LIST ───────────────────────────── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .feature-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 0.88rem;
+    color: var(--text);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .feature-item::before {
+    content: '›';
+    color: var(--accent);
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 1.1rem;
+    line-height: 1.3;
+    flex-shrink: 0;
+  }
+
+  /* ─── CODE BLOCKS ────────────────────────────── */
+  .code-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  pre {
+    background: #0a0c10;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 22px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 0.83rem;
+    line-height: 1.65;
+    color: #a8bbd0;
+    margin: 10px 0 16px;
+  }
+
+  pre .cmd { color: var(--accent); }
+  pre .flag { color: #a78bfa; }
+  pre .value { color: var(--accent3); }
+  pre .comment { color: #3a4a5e; font-style: italic; }
+  pre .finding { color: #ff9f7a; }
+  pre .plus { color: var(--accent); }
+  pre .key { color: #7dd3fc; }
+  pre .string { color: #86efac; }
+
+  .inline-cmd {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    background: rgba(0,229,195,0.09);
+    border: 1px solid rgba(0,229,195,0.2);
+    border-radius: 4px;
+    padding: 1px 7px;
+    color: var(--accent);
+  }
+
+  /* ─── FLAG TABLE ─────────────────────────────── */
+  .flag-group {
+    margin-bottom: 28px;
+  }
+
+  .flag-group-title {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    padding-left: 4px;
+  }
+
+  .flag-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  .flag-table tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  .flag-table tr:last-child { border-bottom: none; }
+  .flag-table tr:hover { background: rgba(255,255,255,0.025); }
+
+  .flag-table td {
+    padding: 11px 14px 11px 0;
+    vertical-align: top;
+  }
+
+  .flag-table td:first-child {
+    font-family: var(--mono);
+    color: #a78bfa;
+    white-space: nowrap;
+    padding-right: 20px;
+    width: 1%;
+  }
+
+  .flag-table td:last-child { color: var(--text); }
+
+  /* ─── TUNING TABLE ───────────────────────────── */
+  .tuning-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  .tuning-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.83rem;
+  }
+
+  .tuning-num {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--accent3);
+    font-weight: 600;
+    min-width: 20px;
+  }
+
+  .tuning-desc { color: var(--text); line-height: 1.4; }
+
+  /* ─── SUBSECTIONS ────────────────────────────── */
+  .subsection {
+    margin-top: 36px;
+  }
+
+  .subsection-title {
+    font-family: var(--sans);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent3);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .subsection-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 16px;
+    background: var(--accent3);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ─── FINDING EXPLANATION ────────────────────── */
+  .findings-list { margin-top: 12px; }
+
+  .finding-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 600px) {
+    .finding-row { grid-template-columns: 1fr; }
+  }
+
+  .finding-code {
+    background: #0a0c10;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: #ff9f7a;
+    line-height: 1.5;
+  }
+
+  .finding-explain {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 0.83rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  /* ─── SEVERITY BADGES ────────────────────────── */
+  .severity-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+  }
+
+  .severity-table tr {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .severity-table tr:last-child { border-bottom: none; }
+
+  .severity-table td {
+    padding: 10px 14px 10px 0;
+    font-size: 0.88rem;
+    vertical-align: top;
+  }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-high { background: rgba(255,107,107,0.15); color: #ff6b6b; border: 1px solid rgba(255,107,107,0.3); }
+  .badge-med  { background: rgba(255,209,102,0.12); color: #ffd166; border: 1px solid rgba(255,209,102,0.3); }
+  .badge-low  { background: rgba(100,180,255,0.1);  color: #7dd3fc; border: 1px solid rgba(100,180,255,0.25); }
+
+  .severity-table td:first-child { width: 90px; padding-right: 16px; }
+  .severity-table td:nth-child(2) {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: #8090a8;
+    padding-right: 16px;
+  }
+  .severity-table td:last-child { color: var(--text); }
+
+  /* ─── TIPS LIST ──────────────────────────────── */
+  .tips-list {
+    list-style: none;
+    margin-top: 8px;
+  }
+
+  .tips-list li {
+    position: relative;
+    padding: 12px 16px 12px 44px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+
+  .tips-list li::before {
+    content: attr(data-icon);
+    position: absolute;
+    left: 14px;
+    top: 12px;
+    font-size: 1rem;
+  }
+
+  /* ─── OUTPUT FORMAT PILLS ────────────────────── */
+  .format-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  .format-pill {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    color: var(--text-muted);
+  }
+
+  .format-pill strong { color: var(--accent3); }
+
+  /* ─── FOOTER ─────────────────────────────────── */
+  .footer {
+    margin-top: 80px;
+    padding: 32px 24px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+
+  /* ─── SCROLLBAR ──────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3a4560; }
+
+  /* ─── NAV DOTS ───────────────────────────────── */
+  .toc {
+    position: sticky;
+    top: 16px;
+    float: right;
+    margin-left: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    width: 180px;
+    font-size: 0.78rem;
+  }
+
+  @media (max-width: 760px) { .toc { display: none; } }
+
+  .toc-title {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .toc a {
+    display: block;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.3;
+  }
+
+  .toc a:last-child { border-bottom: none; }
+  .toc a:hover { color: var(--accent); }
+
+  /* ─── JSON HIGHLIGHT ─────────────────────────── */
+  .json-block { color: #8090a8; }
+  .json-block .jk { color: #7dd3fc; }
+  .json-block .jv { color: #86efac; }
+  .json-block .jn { color: var(--accent3); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-label">Kali Linux Security Tools</div>
+  <h1>NIKTO</h1>
+  <p class="hero-sub">คู่มือการใช้งาน Web Server Vulnerability Scanner<br>ฉบับภาษาไทย พร้อมตัวอย่างและคำอธิบายผลลัพธ์</p>
+  <div class="hero-stat">ตรวจสอบได้กว่า <span>6,700+</span> รายการช่องโหว่ &nbsp;·&nbsp; Open Source &nbsp;·&nbsp; Perl-based</div>
+</header>
+
+<div class="container">
+
+  <!-- WARNING -->
+  <div class="warning">
+    <div class="warning-title">คำเตือนสำคัญก่อนใช้งาน</div>
+    <p>Nikto ใช้สแกนหาช่องโหว่ของเว็บเซิร์ฟเวอร์ได้เฉพาะกับเว็บที่คุณ<strong style="color:#eef1f7">เป็นเจ้าของ</strong> หรือ<strong style="color:#eef1f7">ได้รับอนุญาตเป็นลายลักษณ์อักษร</strong>เท่านั้น เช่น แล็บส่วนตัว, DVWA, Metasploitable, TryHackMe, HackTheBox</p>
+    <p>การสแกนเว็บไซต์ของผู้อื่นโดยไม่ได้รับอนุญาตถือเป็น<strong style="color:#ff6b6b">ความผิดทางกฎหมาย</strong>ในหลายประเทศ รวมถึงไทยตาม พ.ร.บ.คอมพิวเตอร์ แม้จะ "แค่สแกน" ก็ตาม ตัวอย่าง IP/URL ในคู่มือนี้เป็นของแล็บทดสอบส่วนตัวเท่านั้น</p>
+  </div>
+
+  <!-- SECTION 1 -->
+  <section class="section" id="sec1">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Nikto คืออะไร</h2>
+    </div>
+
+    <div class="card">
+      <p>Nikto เป็น <strong style="color:#eef1f7">open-source web server scanner</strong> เขียนด้วย Perl ใช้ตรวจสอบเว็บเซิร์ฟเวอร์หาปัญหาด้านความปลอดภัยแบบอัตโนมัติ</p>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-item">ไฟล์/โปรแกรมอันตรายหรือล้าสมัยบนเซิร์ฟเวอร์</div>
+      <div class="feature-item">เวอร์ชันซอฟต์แวร์เก่าที่มีช่องโหว่ CVE ที่รู้จัก</div>
+      <div class="feature-item">การตั้งค่า HTTP header ที่ไม่ปลอดภัย</div>
+      <div class="feature-item">ไฟล์ default/config ที่ไม่ควรเปิดเผย เช่น .htaccess, backup</div>
+      <div class="feature-item">Directory Indexing — ไดเรกทอรีที่เปิดให้ list ได้</div>
+      <div class="feature-item">Cookie ที่ไม่ตั้งค่า secure/httponly และ XSS protection header</div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">ติดตั้งและเริ่มต้นใช้งาน</div>
+      <div class="code-label">ติดตั้งบน Kali Linux (ปกติมีอยู่แล้ว)</div>
+      <pre><span class="cmd">sudo apt update && sudo apt install nikto -y</span></pre>
+      <div class="code-label">ตรวจสอบเวอร์ชัน</div>
+      <pre><span class="cmd">nikto <span class="flag">-Version</span></span></pre>
+      <div class="code-label">อัปเดตฐานข้อมูล plugin/signature ก่อนใช้งาน</div>
+      <pre><span class="cmd">nikto <span class="flag">-update</span></span></pre>
+    </div>
+  </section>
+
+  <!-- SECTION 2 -->
+  <section class="section" id="sec2">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Syntax พื้นฐาน</h2>
+    </div>
+
+    <div class="code-label">รูปแบบหลัก</div>
+    <pre><span class="cmd">nikto <span class="flag">-h</span> <span class="value">&lt;target&gt;</span> [OPTIONS]</span></pre>
+
+    <div class="code-label">รูปแบบที่ใช้บ่อย</div>
+    <pre><span class="cmd">nikto <span class="flag">-h</span> <span class="value">&lt;IP_หรือ_URL&gt;</span>
+nikto <span class="flag">-h</span> <span class="value">&lt;IP&gt;</span> <span class="flag">-p</span> <span class="value">&lt;PORT&gt;</span>
+nikto <span class="flag">-h</span> <span class="value">&lt;URL&gt;</span> <span class="flag">-ssl</span>
+nikto <span class="flag">-h</span> <span class="value">&lt;IP&gt;</span> <span class="flag">-o</span> <span class="value">&lt;output_file&gt;</span> <span class="flag">-F</span> <span class="value">&lt;format&gt;</span></pre>
+  </section>
+
+  <!-- SECTION 3 -->
+  <section class="section" id="sec3">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>คำอธิบาย Flag ทั้งหมด</h2>
+    </div>
+
+    <!-- Target Flags -->
+    <div class="flag-group">
+      <div class="flag-group-title">กลุ่มเป้าหมาย</div>
+      <table class="flag-table">
+        <tr>
+          <td>-h, -host</td>
+          <td>ระบุเป้าหมาย (IP, hostname, หรือ URL เต็ม) เช่น <span class="inline-cmd">-h 10.10.10.5</span> หรือ <span class="inline-cmd">-h http://10.10.10.5</span></td>
+        </tr>
+        <tr>
+          <td>-p, -port</td>
+          <td>ระบุพอร์ต (default 80, หรือ 443 ถ้าใช้ -ssl) รองรับหลายพอร์ต เช่น <span class="inline-cmd">-p 80,443,8080</span></td>
+        </tr>
+        <tr>
+          <td>-ssl</td>
+          <td>บังคับใช้ SSL/TLS (https) ในการเชื่อมต่อ</td>
+        </tr>
+        <tr>
+          <td>-root</td>
+          <td>กำหนด base path ที่จะสแกน กรณีเว็บอยู่ใน subdirectory เช่น <span class="inline-cmd">-root /dvwa/</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Scan Control -->
+    <div class="flag-group">
+      <div class="flag-group-title">กลุ่มควบคุมการสแกน</div>
+      <table class="flag-table">
+        <tr>
+          <td>-Tuning</td>
+          <td>
+            เลือกประเภทการทดสอบเฉพาะ (ดูตารางด้านล่าง)
+            <div class="tuning-grid" style="margin-top:12px">
+              <div class="tuning-item"><span class="tuning-num">1</span><span class="tuning-desc">Interesting File / Seen in logs</span></div>
+              <div class="tuning-item"><span class="tuning-num">2</span><span class="tuning-desc">Misconfiguration / Default File</span></div>
+              <div class="tuning-item"><span class="tuning-num">3</span><span class="tuning-desc">Information Disclosure</span></div>
+              <div class="tuning-item"><span class="tuning-num">4</span><span class="tuning-desc">Injection (XSS/Script/HTML)</span></div>
+              <div class="tuning-item"><span class="tuning-num">5</span><span class="tuning-desc">Remote File Retrieval - Inside Web Root</span></div>
+              <div class="tuning-item"><span class="tuning-num">6</span><span class="tuning-desc">Denial of Service</span></div>
+              <div class="tuning-item"><span class="tuning-num">7</span><span class="tuning-desc">Remote File Retrieval - Server Wide</span></div>
+              <div class="tuning-item"><span class="tuning-num">8</span><span class="tuning-desc">Command Execution / Remote Shell</span></div>
+              <div class="tuning-item"><span class="tuning-num">9</span><span class="tuning-desc">SQL Injection</span></div>
+              <div class="tuning-item"><span class="tuning-num">0</span><span class="tuning-desc">File Upload</span></div>
+              <div class="tuning-item"><span class="tuning-num">x</span><span class="tuning-desc">Reverse Tuning (ใช้ exclude แทน)</span></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>-evasion</td>
+          <td>เลือกเทคนิคหลบ IDS/IPS (1–8) เช่น URL encoding, directory self-reference เพื่อเลี่ยงการตรวจจับ</td>
+        </tr>
+        <tr>
+          <td>-timeout</td>
+          <td>เวลา timeout ต่อ request (default 10 วินาที)</td>
+        </tr>
+        <tr>
+          <td>-maxtime</td>
+          <td>จำกัดเวลาสแกนทั้งหมด เช่น <span class="inline-cmd">-maxtime 1h</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Output Flags -->
+    <div class="flag-group">
+      <div class="flag-group-title">กลุ่ม Output</div>
+      <table class="flag-table">
