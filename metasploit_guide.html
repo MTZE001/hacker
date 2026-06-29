@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คู่มือ Metasploit Framework</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --border:    #21262d;
+    --accent:    #58a6ff;
+    --green:     #3fb950;
+    --red:       #f85149;
+    --yellow:    #d29922;
+    --purple:    #bc8cff;
+    --text:      #c9d1d9;
+    --muted:     #6e7681;
+    --heading:   #e6edf3;
+    --mono:      'IBM Plex Mono', monospace;
+    --body:      'Noto Sans Thai', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.75;
+    min-height: 100vh;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 60%, #0f2033 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 56px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(88,166,255,.10) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(88,166,255,.04) 39px, rgba(88,166,255,.04) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(88,166,255,.04) 39px, rgba(88,166,255,.04) 40px);
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(88,166,255,.12);
+    border: 1px solid rgba(88,166,255,.35);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .hero h1 {
+    font-family: var(--mono);
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 600;
+    color: var(--heading);
+    line-height: 1.2;
+    position: relative;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub {
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: 14px;
+    position: relative;
+  }
+
+  /* ── WARNING BOX ── */
+  .warning-box {
+    max-width: 860px;
+    margin: 32px auto;
+    padding: 20px 24px;
+    background: rgba(248,81,73,.07);
+    border: 1px solid rgba(248,81,73,.35);
+    border-left: 4px solid var(--red);
+    border-radius: 8px;
+  }
+  .warning-box .warn-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--red);
+    letter-spacing: .1em;
+    margin-bottom: 10px;
+  }
+  .warning-box p { font-size: 14px; color: #c9d1d9; margin-bottom: 8px; }
+  .warning-box p:last-child { margin-bottom: 0; }
+  .warning-box ul { padding-left: 18px; font-size: 14px; }
+  .warning-box ul li { margin-bottom: 4px; }
+
+  /* ── LAYOUT ── */
+  .wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    margin-bottom: 48px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(88,166,255,.10);
+    border: 1px solid rgba(88,166,255,.25);
+    padding: 2px 10px;
+    border-radius: 4px;
+    letter-spacing: .05em;
+  }
+  .section-title {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--heading);
+    letter-spacing: .02em;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--purple);
+    margin-bottom: 10px;
+    letter-spacing: .05em;
+  }
+  .card p { font-size: 14px; color: var(--text); }
+
+  /* ── MODULE GRID ── */
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .module-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    transition: border-color .2s;
+  }
+  .module-card:hover { border-color: rgba(88,166,255,.5); }
+  .module-type {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .module-type.exploit { color: var(--red); }
+  .module-type.payload { color: var(--green); }
+  .module-type.auxiliary { color: var(--yellow); }
+  .module-type.post { color: var(--purple); }
+  .module-type.encoder { color: var(--accent); }
+  .module-type.nop { color: var(--muted); }
+  .module-card p { font-size: 13px; color: var(--text); line-height: 1.55; }
+
+  /* ── COMMAND TABLE ── */
+  .cmd-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  .cmd-table tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .cmd-table tr:last-child { border-bottom: none; }
+  .cmd-table tr:hover { background: rgba(88,166,255,.04); }
+  .cmd-table td {
+    padding: 10px 14px;
+    vertical-align: top;
+  }
+  .cmd-table td:first-child {
+    font-family: var(--mono);
+    color: var(--green);
+    white-space: nowrap;
+    width: 220px;
+  }
+  .cmd-table td:last-child { color: var(--text); }
+
+  /* ── OPTION TABLE ── */
+  .opt-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  .opt-table thead tr { background: rgba(88,166,255,.06); }
+  .opt-table th {
+    padding: 10px 14px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .opt-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .opt-table tr:last-child td { border-bottom: none; }
+  .opt-table tr:hover td { background: rgba(88,166,255,.04); }
+  .opt-table td:first-child {
+    font-family: var(--mono);
+    font-weight: 600;
+    color: var(--yellow);
+    white-space: nowrap;
+  }
+  .opt-table td:nth-child(2) { color: var(--text); }
+  .opt-table td:nth-child(3) {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--purple);
+  }
+
+  /* ── EXAMPLE BLOCK ── */
+  .example {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .example-header {
+    background: rgba(255,255,255,.03);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ex-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .ex-dot.r { background: #f85149; }
+  .ex-dot.y { background: #d29922; }
+  .ex-dot.g { background: #3fb950; }
+  .example-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: 6px;
+    letter-spacing: .05em;
+  }
+  .example-body { padding: 18px 20px; }
+
+  /* ── STEP ── */
+  .step {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: flex-start;
+  }
+  .step:last-child { margin-bottom: 0; }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    background: rgba(88,166,255,.12);
+    border: 1px solid rgba(88,166,255,.35);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+  .step-content { flex: 1; }
+  .step-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    letter-spacing: .06em;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 6px;
+    margin-bottom: 6px;
+  }
+  .code .prompt { color: var(--muted); }
+  .code .cmd    { color: var(--green); }
+  .code .opt    { color: var(--yellow); }
+  .code .val    { color: var(--purple); }
+  .code .info   { color: var(--muted); }
+  .code .success{ color: var(--green); }
+  .code .fail   { color: var(--red); }
+  .code .warn   { color: var(--yellow); }
+  .code .output { color: #c9d1d9; }
+  .code .header { color: var(--accent); }
+  .code .comment{ color: var(--muted); font-style: italic; }
+
+  /* ── INSTALL BOX ── */
+  .install-box {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--green);
+    margin-top: 12px;
+  }
+
+  /* ── SESSION TABLE ── */
+  .sess-table {
+    width: 100%;
+    font-family: var(--mono);
+    font-size: 12px;
+    border-collapse: collapse;
+    background: #0d1117;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .sess-table th {
+    background: rgba(88,166,255,.08);
+    color: var(--muted);
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    letter-spacing: .08em;
+  }
+  .sess-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sess-table tr:last-child td { border-bottom: none; }
+  .sess-table td:first-child { color: var(--yellow); }
+  .sess-table td:nth-child(3) { color: var(--purple); }
+  .sess-table td:nth-child(4) { color: var(--green); }
+  .sess-table td:nth-child(5) { color: var(--muted); font-size: 11px; }
+
+  /* ── SYMBOL TABLE ── */
+  .sym-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+  }
+  .sym-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .sym-badge {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 36px;
+    padding: 2px 0;
+  }
+  .sym-badge.info    { color: var(--muted); }
+  .sym-badge.success { color: var(--green); }
+  .sym-badge.fail    { color: var(--red); }
+  .sym-badge.warning { color: var(--yellow); }
+  .sym-label { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+  /* ── CHECKLIST ── */
+  .checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    counter-reset: check;
+  }
+  .check-item {
+    display: flex;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    align-items: flex-start;
+  }
+  .check-icon {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(88,166,255,.10);
+    border: 1px solid rgba(88,166,255,.25);
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    margin-top: 1px;
+  }
+  .check-item p { font-size: 14px; color: var(--text); }
+
+  /* ── TIPS ── */
+  .tip-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .tip-list li {
+    display: flex;
+    gap: 10px;
+    font-size: 14px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .tip-list li::before {
+    content: '→';
+    font-family: var(--mono);
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ── TOOL CHAIN ── */
+  .toolchain {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .tool-chip {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid;
+  }
+  .tool-chip.scan   { color: var(--accent);  border-color: rgba(88,166,255,.35);  background: rgba(88,166,255,.08); }
+  .tool-chip.web    { color: var(--yellow);  border-color: rgba(210,153,34,.35);  background: rgba(210,153,34,.08); }
+  .tool-chip.crack  { color: var(--purple);  border-color: rgba(188,140,255,.35); background: rgba(188,140,255,.08); }
+  .tool-chip.exploit{ color: var(--red);     border-color: rgba(248,81,73,.35);   background: rgba(248,81,73,.08); }
+
+  /* ── METERP COMMANDS ── */
+  .metr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+  }
+  .metr-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+  .metr-cmd {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--green);
+    margin-bottom: 4px;
+  }
+  .metr-desc { font-size: 13px; color: var(--muted); }
+
+  /* ── RESULT LEGEND ── */
+  .result-note {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    background: rgba(255,255,255,.02);
+    border: 1px solid var(--border);
+  }
+  .rn-tag { font-family: var(--mono); font-weight: 600; flex-shrink: 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 32px 24px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: .08em;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width: 600px) {
+    .cmd-table td:first-child { width: auto; font-size: 12px; }
+    .module-grid { grid-template-columns: 1fr; }
+    .sym-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ────── HERO ────── -->
+<header class="hero">
+  <div class="hero-badge">PENETRATION TESTING · LAB USE ONLY</div>
+  <h1>Metasploit <span>Framework</span></h1>
+  <p class="hero-sub">msfconsole · Exploitation Framework บน Kali Linux</p>
+</header>
+
+<!-- ────── WARNING ────── -->
+<div style="max-width:900px;margin:0 auto;padding:0 24px;">
+  <div class="warning-box">
+    <div class="warn-title">⚠ คำเตือนสำคัญก่อนใช้งาน</div>
+    <p>Metasploit ใช้สำหรับ <strong>เจาะระบบจริง (exploit)</strong> เพื่อเข้าควบคุมเครื่องเป้าหมาย ต่างจากเครื่องมือสแกน/เดารหัสที่ผ่านมา ความเสี่ยงทางกฎหมายสูงกว่ามาก ใช้ได้เฉพาะกับ:</p>
+    <ul>
+      <li>แล็บที่สร้างมาเพื่อฝึกฝนโดยเฉพาะ เช่น Metasploitable2/3, TryHackMe, HackTheBox, VulnHub</li>
+      <li>ระบบที่คุณเป็นเจ้าของ หรือมีสัญญา/เอกสารอนุญาต pentest เป็นลายลักษณ์อักษรชัดเจน (scope of work)</li>
+    </ul>
+    <p style="margin-top:10px;">การยิง exploit เข้าระบบของผู้อื่นโดยไม่ได้รับอนุญาต ไม่ว่าจะสำเร็จหรือไม่ <strong>ถือเป็นความผิดทางกฎหมายร้ายแรง</strong></p>
+  </div>
+</div>
+
+<!-- ────── MAIN ────── -->
+<main class="wrapper">
+
+  <!-- ── Section 1 ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">01</span>
+      <span class="section-title">METASPLOIT คืออะไร</span>
+    </div>
+
+    <div class="card">
+      <p>Metasploit Framework (MSF) เป็นชุดเครื่องมือสำหรับพัฒนา ทดสอบ และรัน exploit code แบบเป็นระบบ มี database exploit/payload ที่อัปเดตสม่ำเสมอ และมี interface หลักชื่อ <span style="font-family:var(--mono);color:var(--accent);">msfconsole</span></p>
+    </div>
+
+    <div style="margin-bottom:18px;">
+      <div style="font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.08em;margin-bottom:12px;">MODULE TYPES</div>
+      <div class="module-grid">
+        <div class="module-card">
+          <div class="module-type exploit">exploit</div>
+          <p>โค้ดที่ใช้ "เจาะ" ช่องโหว่เพื่อเข้าระบบ</p>
+        </div>
+        <div class="module-card">
+          <div class="module-type payload">payload</div>
+          <p>โค้ดที่รันหลัง exploit สำเร็จ เช่น เปิด shell</p>
+        </div>
+        <div class="module-card">
+          <div class="module-type auxiliary">auxiliary</div>
+          <p>โค้ดเสริม เช่น scanner, fuzzer, DoS ช่วยเก็บข้อมูล</p>
+        </div>
+        <div class="module-card">
+          <div class="module-type post">post</div>
+          <p>โค้ดที่รันหลังเข้าระบบได้แล้ว เช่น privilege escalation</p>
+        </div>
+        <div class="module-card">
+          <div class="module-type encoder">encoder</div>
+          <p>ใช้เข้ารหัส payload เพื่อหลีกเลี่ยงตัวอักษรที่เป็นปัญหา</p>
+        </div>
+        <div class="module-card">
+          <div class="module-type nop">nop</div>
+          <p>Generator no-operation code ใช้ใน buffer overflow</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">SESSION</div>
+      <p>การเชื่อมต่อที่เปิดอยู่หลัง exploit สำเร็จ เช่น meterpreter session, shell session ใช้ ID อ้างอิงเมื่อต้องจัดการหลาย session</p>
+    </div>
+
+    <div style="font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.08em;margin:18px 0 8px;">ติดตั้งและเริ่มต้นใช้งาน</div>
+    <div class="install-box">
+      <div><span style="color:var(--muted);"># ติดตั้ง (Kali ปกติมีอยู่แล้ว)</span></div>
+      <div>sudo apt update &amp;&amp; sudo apt install metasploit-framework -y</div>
+      <div style="margin-top:8px;"><span style="color:var(--muted);"># ครั้งแรก: สร้าง database ก่อน</span></div>
+      <div>sudo msfdb init</div>
+      <div>msfconsole</div>
+    </div>
+  </section>
+
+  <!-- ── Section 2 ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">02</span>
+      <span class="section-title">คำสั่งพื้นฐานใน msfconsole</span>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="cmd-table">
+        <tbody>
+          <tr><td>search &lt;keyword&gt;</td><td>ค้นหา module จาก keyword / CVE / ชื่อ</td></tr>
+          <tr><td>use &lt;module_path&gt;</td><td>เลือก module มาใช้งาน</td></tr>
+          <tr><td>info</td><td>แสดงรายละเอียดของ module ที่เลือกอยู่</td></tr>
+          <tr><td>show options</td><td>แสดงค่า parameter ที่ต้องตั้งของ module</td></tr>
+          <tr><td>show payloads</td><td>แสดง payload ที่ใช้ได้กับ exploit นี้</td></tr>
+          <tr><td>show targets</td><td>แสดงเป้าหมาย (OS/version) ที่ module รองรับ</td></tr>
+          <tr><td>set &lt;OPTION&gt; &lt;VALUE&gt;</td><td>ตั้งค่า parameter เช่น set RHOSTS</td></tr>
+          <tr><td>setg &lt;OPTION&gt; &lt;VALUE&gt;</td><td>ตั้งค่าแบบ global ใช้ข้ามทุก module ใน session ปัจจุบัน</td></tr>
+          <tr><td>unset &lt;OPTION&gt;</td><td>ลบค่าที่ตั้งไว้</td></tr>
+          <tr><td>run / exploit</td><td>สั่งรัน module ที่เลือกไว้</td></tr>
+          <tr><td>back</td><td>ออกจาก module ปัจจุบัน กลับไปหน้าหลัก</td></tr>
+          <tr><td>sessions -l</td><td>แสดง session ที่เปิดอยู่ทั้งหมด</td></tr>
+          <tr><td>sessions -i &lt;ID&gt;</td><td>เข้าไปใน session ที่เลือก</td></tr>
+          <tr><td>jobs -l</td><td>แสดง background job ที่กำลังรัน</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── Section 3 ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-number">03</span>
+      <span class="section-title">OPTIONS ที่พบบ่อย</span>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="opt-table">
+        <thead>
+          <tr><th>OPTION</th><th>ความหมาย</th><th>ตัวอย่าง</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>RHOSTS</td>
+            <td>IP เป้าหมาย (Remote Host) รองรับ range / CIDR ด้วย</td>
+            <td>set RHOSTS 10.10.10.5<br>set RHOSTS 10.10.10.0/24</td>
+          </tr>
+          <tr>
+            <td>RPORT</td>
+            <td>พอร์ตเป้าหมาย (Remote Port)</td>
+            <td>set RPORT 445</td>
+          </tr>
+          <tr>
+            <td>LHOST</td>
+            <td>IP ของเครื่องเรา ที่ payload จะเชื่อมต่อกลับมา (สำคัญมากสำหรับ reverse shell)</td>
+            <td>set LHOST 10.10.10.100</td>
+          </tr>
+          <tr>
+            <td>LPORT</td>
+            <td>พอร์ตของเครื่องเราที่รอรับการเชื่อมต่อกลับ</td>
+            <td>set 
